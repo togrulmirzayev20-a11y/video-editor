@@ -3,30 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VideoEditor — Auto Ratio</title>
+<title>VideoEditor — n8n Ready</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0d12;--sf:#0f0f18;--sf2:#111118;--bd:rgba(255,255,255,0.07);--tx:#e8e8f0;--mt:#888898;--ac:#6c63ff;--ac2:#a78bfa;--gn:#34d399}
 body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;background:#0a0a0f;border-bottom:0.5px solid var(--bd);flex-shrink:0}
-.logo{font-size:13px;font-weight:700;color:var(--ac2)}
-.sp{flex:1}
-.btn{background:rgba(255,255,255,0.05);border:0.5px solid var(--bd);color:var(--mt);padding:5px 11px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
-.btn:hover{background:rgba(255,255,255,0.1);color:var(--tx)}
-.btn-ac{background:var(--ac);border:none;color:#fff;padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500}
-.sep{width:1px;height:18px;background:var(--bd);margin:0 3px}
 
-/* N8N BANNER */
+/* ── NAVBAR ── */
+nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:52px;background:#0a0a0f;border-bottom:0.5px solid var(--bd);flex-shrink:0;flex-wrap:wrap}
+.logo{font-size:13px;font-weight:700;color:var(--ac2);white-space:nowrap}
+.nav-sep{width:1px;height:18px;background:var(--bd);margin:0 4px;flex-shrink:0}
+.api-wrap{display:flex;align-items:center;gap:6px;flex:1;max-width:420px}
+.api-lbl{font-size:10px;color:#444460;white-space:nowrap}
+.api-input{flex:1;background:rgba(255,255,255,0.05);border:0.5px solid var(--bd);color:var(--tx);padding:5px 10px;border-radius:6px;font-size:11px;outline:none;font-family:inherit;min-width:0}
+.api-input:focus{border-color:rgba(108,99,255,0.4)}
+.api-input::placeholder{color:#333348}
+.btn-connect{background:rgba(108,99,255,0.15);border:0.5px solid rgba(108,99,255,0.3);color:var(--ac2);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.btn-connect:hover{background:rgba(108,99,255,0.25)}
+.status-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mt);white-space:nowrap}
+.sdot{width:7px;height:7px;border-radius:50%;background:#444460;flex-shrink:0}
+.sdot.ok{background:var(--gn);animation:pulse 2s infinite}
+.sdot.err{background:#e24b4a}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sp{flex:1}
+.btn-exp{background:var(--ac);border:none;color:#fff;padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.btn-exp:hover{background:#7c73ff}
+
+/* ── N8N BANNER ── */
 #banner{display:none;align-items:center;gap:8px;padding:7px 16px;background:rgba(108,99,255,0.1);border-bottom:0.5px solid rgba(108,99,255,0.25);font-size:11px;color:var(--ac2);flex-shrink:0}
 .abadge{background:rgba(52,211,153,0.15);border:0.5px solid rgba(52,211,153,0.3);color:var(--gn);padding:2px 8px;border-radius:100px;font-size:9px;font-weight:600}
 #banner button{margin-left:auto;background:none;border:none;color:var(--mt);cursor:pointer;font-size:16px}
 
-/* RATIO BAR */
+/* ── RATIO BAR ── */
 .rbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#0a0a0f;border-bottom:0.5px solid var(--bd);flex-shrink:0;flex-wrap:wrap}
 .rlbl{font-size:10px;color:#444460}
 .atog{display:flex;align-items:center;gap:5px;background:rgba(52,211,153,0.08);border:0.5px solid rgba(52,211,153,0.25);padding:5px 10px;border-radius:7px;cursor:pointer;transition:all .2s}
 .atog.off{background:rgba(255,255,255,0.03);border-color:var(--bd)}
-.adot{width:7px;height:7px;border-radius:50%;background:var(--gn);transition:all .3s}
+.adot{width:7px;height:7px;border-radius:50%;background:var(--gn)}
 .atog.off .adot{background:#444460}
 .atxt{font-size:10px;color:var(--gn);font-weight:500}
 .atog.off .atxt{color:#555570}
@@ -39,24 +52,25 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 .rs{font-size:8px;opacity:.7;margin-top:1px}
 .apin{position:absolute;top:-5px;right:-5px;background:var(--gn);color:#000;font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px}
 
-/* PLATFORM MAP */
+/* ── PLATFORM MAP ── */
 .pmap{display:flex;align-items:center;gap:6px;padding:5px 16px;background:rgba(52,211,153,0.03);border-bottom:0.5px solid rgba(52,211,153,0.08);flex-wrap:wrap;flex-shrink:0}
 .pmlbl{font-size:9px;color:var(--gn);opacity:.6}
 .pm{background:rgba(255,255,255,0.03);border:0.5px solid var(--bd);padding:2px 7px;border-radius:4px;font-size:9px;color:#555570}
 .pm b{color:var(--mt)}
 
-/* DEMO BAR */
+/* ── DEMO BAR ── */
 .dbar{display:flex;align-items:center;gap:5px;padding:5px 16px;background:rgba(255,255,255,0.01);border-bottom:0.5px solid var(--bd);flex-wrap:wrap;flex-shrink:0}
 .dlbl{font-size:9px;color:#444460}
 .dbtn{background:rgba(255,255,255,0.03);border:0.5px solid var(--bd);color:#555570;padding:3px 9px;border-radius:5px;font-size:9px;cursor:pointer;font-family:inherit;transition:all .15s}
 .dbtn:hover{color:var(--ac2);border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.08)}
 
-/* MAIN */
+/* ── MAIN LAYOUT ── */
 .main{display:grid;grid-template-columns:185px 1fr;flex:1;min-height:0}
 .sidebar{background:var(--sf);border-right:0.5px solid var(--bd);display:flex;flex-direction:column}
 .sbt{padding:10px 10px 6px}
 .slbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#444460;margin-bottom:6px}
-.abtn{width:100%;background:rgba(108,99,255,0.1);border:0.5px dashed rgba(108,99,255,0.3);color:var(--ac2);padding:8px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+.abtn{width:100%;background:rgba(108,99,255,0.1);border:0.5px dashed rgba(108,99,255,0.3);color:var(--ac2);padding:8px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s}
+.abtn:hover{background:rgba(108,99,255,0.2)}
 .abtn input{display:none}
 .clst{flex:1;overflow-y:auto;padding:4px 8px 8px}
 .cc{background:rgba(255,255,255,0.03);border:0.5px solid var(--bd);border-radius:7px;padding:7px 8px;margin-bottom:4px;cursor:pointer;transition:all .15s}
@@ -75,7 +89,7 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 .tss{flex:1;background:rgba(108,99,255,0.08);border:0.5px solid rgba(108,99,255,0.2);color:var(--ac2);padding:3px 4px;border-radius:4px;font-size:9px;cursor:pointer;font-family:inherit;outline:none}
 .em{text-align:center;padding:20px 8px;color:#2a2a40;font-size:11px;line-height:1.7}
 
-/* CANVAS */
+/* ── CANVAS ── */
 .ccol{display:flex;flex-direction:column;background:var(--sf2)}
 .cvw{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;position:relative;min-height:200px}
 .vc{position:relative;border-radius:8px;overflow:hidden;background:#000;transition:all .35s cubic-bezier(.4,0,.2,1)}
@@ -89,11 +103,10 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 .rbadge{position:absolute;top:7px;right:7px;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;z-index:11;pointer-events:none}
 .rbadge.m{background:rgba(0,0,0,.65);border:0.5px solid rgba(108,99,255,0.4);color:var(--ac2)}
 .rbadge.a{background:rgba(52,211,153,.85);color:#000}
-.ph{text-align:center;color:#2a2a40;position:absolute}
-.ph p{font-size:11px;margin-top:8px;line-height:1.7}
+.ph2{text-align:center;color:#2a2a40;position:absolute}
+.ph2 p{font-size:11px;margin-top:8px;line-height:1.7}
 #tind{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(108,99,255,.85);color:#fff;padding:4px 12px;border-radius:100px;font-size:10px;font-weight:500;opacity:0;transition:opacity .2s;z-index:20;white-space:nowrap;pointer-events:none}
 
-/* Keçid animasiyaları */
 @keyframes fadeOut{from{opacity:1}to{opacity:0}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes sOL{from{transform:translateX(0)}to{transform:translateX(-100%)}}
@@ -109,18 +122,36 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 @keyframes fO{0%{opacity:1}49%{opacity:1}50%{opacity:0;filter:brightness(8)}100%{opacity:0}}
 @keyframes fI{0%{opacity:0;filter:brightness(8)}50%{opacity:0}51%{opacity:1}100%{opacity:1}}
 
-/* CONTROLS */
+/* ── CONTROLS ── */
 .ctrl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#0a0a0f;border-top:0.5px solid var(--bd);flex-shrink:0}
 .cb{background:rgba(255,255,255,0.06);border:0.5px solid var(--bd);color:#c0c0d8;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;flex-shrink:0}
 .cb:hover{background:rgba(255,255,255,0.12);color:#fff}
 .pb{width:36px!important;height:36px!important;background:var(--ac)!important;border-color:var(--ac)!important;color:#fff!important;font-size:14px!important}
 .pb:hover{background:#7c73ff!important}
-.td{font-size:11px;color:var(--mt);min-width:90px;text-align:center;font-variant-numeric:tabular-nums;flex-shrink:0}
+.tdt{font-size:11px;color:var(--mt);min-width:90px;text-align:center;font-variant-numeric:tabular-nums;flex-shrink:0}
 #sk,#vls{accent-color:var(--ac)}
 #sk{flex:1}
 #vls{width:52px}
 
-/* TRANS PANEL */
+/* ── RENDER PANEL ── */
+.rpan{background:#0a0a0f;border-top:0.5px solid var(--bd);padding:10px 14px;flex-shrink:0}
+.rp-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rp-lbl{font-size:10px;color:#444460;white-space:nowrap}
+.rp-sel{background:rgba(255,255,255,0.05);border:0.5px solid var(--bd);color:var(--mt);padding:4px 8px;border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit;outline:none}
+.rp-cb-url{flex:1;min-width:140px;background:rgba(255,255,255,0.04);border:0.5px solid var(--bd);color:var(--tx);padding:4px 8px;border-radius:5px;font-size:10px;outline:none;font-family:inherit}
+.rp-cb-url::placeholder{color:#333348}
+.rp-cb-url:focus{border-color:rgba(108,99,255,0.4)}
+.btn-render{background:var(--ac);border:none;color:#fff;padding:6px 16px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.btn-render:hover{background:#7c73ff}
+.btn-render:disabled{opacity:.5;pointer-events:none}
+.rp-st{font-size:10px;color:var(--mt);text-align:right}
+.rp-st.ok{color:var(--gn)}
+.rp-st.err{color:#e24b4a}
+.rp-st.proc{color:var(--ac2)}
+.prog-bar{width:100%;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden;display:none}
+.prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .3s;width:0}
+
+/* ── TRANS PANEL ── */
 .tpan{background:#0a0a0f;border-top:0.5px solid var(--bd);padding:10px 14px;flex-shrink:0}
 .tph{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .tpt{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#444460}
@@ -136,7 +167,7 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 .tin{font-size:8px;color:#666680}
 .ti.on .tin{color:var(--ac2)}
 
-/* TIMELINE */
+/* ── TIMELINE ── */
 .tl{background:#0a0a0f;border-top:0.5px solid var(--bd);padding:8px 14px;flex-shrink:0}
 .tlh{display:flex;align-items:center;margin-bottom:5px}
 .tll{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:#2a2a40;flex:1}
@@ -154,16 +185,35 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
 </head>
 <body>
 
+<!-- ── NAVBAR ── -->
 <nav>
   <span class="logo">▶ VideoEditor</span>
-  <div class="sep"></div>
-  <button class="btn" onclick="mvC(-1)">← Geri</button>
-  <button class="btn" onclick="mvC(1)">İrəli →</button>
+  <div class="nav-sep"></div>
+
+  <!-- API URL SAHƏSİ — Railway linkini bura yaz -->
+  <div class="api-wrap">
+    <span class="api-lbl">API:</span>
+    <input
+      class="api-input"
+      id="apiInput"
+      placeholder="https://video-editor-xxxx.up.railway.app"
+      value=""
+    >
+    <button class="btn-connect" onclick="connectApi()">Qoş</button>
+  </div>
+
+  <div class="nav-sep"></div>
+  <div class="status-wrap">
+    <div class="sdot" id="sdot"></div>
+    <span id="stxt">Qoşulmayıb</span>
+  </div>
+
   <div class="sp"></div>
   <span id="si" style="font-size:10px;color:#444460;margin-right:8px"></span>
-  <button class="btn-ac" onclick="doExp()">↓ Export</button>
+  <button class="btn-exp" onclick="doExp()">↓ Export</button>
 </nav>
 
+<!-- ── N8N BANNER ── -->
 <div id="banner">
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#a78bfa" stroke-width="1.5"/><path d="M12 8v5l3 2" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/></svg>
   <span id="bmsg">n8n avtomatik ratio seçdi</span>
@@ -171,13 +221,14 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
   <button onclick="this.parentElement.style.display='none'">×</button>
 </div>
 
+<!-- ── RATIO BAR ── -->
 <div class="rbar">
   <span class="rlbl">Format:</span>
   <div class="atog" id="atog" onclick="togAuto()">
     <div class="adot"></div>
     <span class="atxt">Avtomatik</span>
   </div>
-  <div class="sep"></div>
+  <div class="nav-sep"></div>
   <div class="ropts">
     <button class="rbtn on" id="r169" onclick="manR('16:9',this)">
       <svg width="22" height="14" viewBox="0 0 22 14" fill="none"><rect x=".5" y=".5" width="21" height="13" rx="2" stroke="currentColor" stroke-opacity=".6"/><rect x="3" y="3" width="16" height="8" rx="1" fill="currentColor" fill-opacity=".15"/></svg>
@@ -185,7 +236,7 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
     </button>
     <button class="rbtn" id="r916" onclick="manR('9:16',this)">
       <svg width="14" height="22" viewBox="0 0 14 22" fill="none"><rect x=".5" y=".5" width="13" height="21" rx="2" stroke="currentColor" stroke-opacity=".6"/><rect x="3" y="3" width="8" height="16" rx="1" fill="currentColor" fill-opacity=".15"/></svg>
-      <div><div class="rn">9:16</div><div class="rs">Shorts·Reels</div></div>
+      <div><div class="rn">9:16</div><div class="rs">Shorts · Reels</div></div>
     </button>
     <button class="rbtn" id="r11" onclick="manR('1:1',this)">
       <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x=".5" y=".5" width="16" height="16" rx="2" stroke="currentColor" stroke-opacity=".6"/><rect x="3" y="3" width="11" height="11" rx="1" fill="currentColor" fill-opacity=".15"/></svg>
@@ -198,16 +249,18 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
   </div>
 </div>
 
+<!-- ── PLATFORM MAP ── -->
 <div class="pmap" id="pmap">
-  <span class="pmlbl">n8n platform → ratio:</span>
+  <span class="pmlbl">n8n avtomatik:</span>
   <div class="pm"><b>youtube</b> → 16:9</div>
   <div class="pm"><b>shorts / reels / tiktok</b> → 9:16</div>
   <div class="pm"><b>instagram</b> → 1:1</div>
   <div class="pm"><b>instagram_portrait</b> → 4:5</div>
 </div>
 
+<!-- ── DEMO BAR ── -->
 <div class="dbar">
-  <span class="dlbl">n8n simulasiyası sına:</span>
+  <span class="dlbl">n8n simulasiya:</span>
   <button class="dbtn" onclick="simN8n('youtube')">YouTube</button>
   <button class="dbtn" onclick="simN8n('youtube_shorts')">Shorts</button>
   <button class="dbtn" onclick="simN8n('instagram_reels')">Reels</button>
@@ -216,18 +269,27 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
   <button class="dbtn" onclick="simN8n('instagram_portrait')">IG Portrait</button>
 </div>
 
+<!-- ── MAIN ── -->
 <div class="main">
   <div class="sidebar">
     <div class="sbt">
       <div class="slbl">Kliplər</div>
-      <label class="abtn"><input type="file" accept="video/*" multiple onchange="addC(this)"><span style="font-size:14px">+</span> Video əlavə et</label>
+      <label class="abtn">
+        <input type="file" accept="video/*" multiple onchange="addC(this)">
+        <span style="font-size:14px">+</span> Video əlavə et
+      </label>
     </div>
-    <div class="clst" id="clist"><div class="em" id="em">Video yoxdur.<br>Əlavə edin.</div></div>
+    <div class="clst" id="clist">
+      <div class="em" id="em">Video yoxdur.<br>Əlavə edin.</div>
+    </div>
   </div>
 
   <div class="ccol">
     <div class="cvw" id="cvw">
-      <div class="ph" id="ph"><svg width="44" height="44" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="#2a2a40" stroke-width="1.2"/><path d="M10 9l5 3-5 3V9z" fill="#2a2a40"/></svg><p>Video əlavə edin</p></div>
+      <div class="ph2" id="ph2">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="#2a2a40" stroke-width="1.2"/><path d="M10 9l5 3-5 3V9z" fill="#2a2a40"/></svg>
+        <p>Video əlavə edin</p>
+      </div>
       <div class="vc r169" id="vc" style="display:none">
         <video id="vA" class="vl" playsinline></video>
         <video id="vB" class="vl" playsinline muted></video>
@@ -235,11 +297,12 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
       </div>
       <div id="tind"></div>
     </div>
+
     <div class="ctrl">
       <button class="cb" onclick="jC(-1)">⏮</button>
       <button class="cb pb" id="pbt" onclick="togP()">▶</button>
       <button class="cb" onclick="jC(1)">⏭</button>
-      <div class="td" id="tdt">0:00 / 0:00</div>
+      <div class="tdt" id="tdt">0:00 / 0:00</div>
       <input type="range" id="sk" min="0" max="100" value="0" step="0.1" oninput="onSk(this.value)">
       <span style="font-size:11px;color:#444460">🔊</span>
       <input type="range" id="vls" min="0" max="1" value="1" step="0.05" oninput="vA.volume=parseFloat(this.value)">
@@ -247,10 +310,15 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
   </div>
 </div>
 
+<!-- ── TRANS PANEL ── -->
 <div class="tpan">
   <div class="tph">
     <span class="tpt">Keçid effektləri</span>
-    <div class="tpd"><label>Müddət:</label><input type="range" id="tds" min="0.3" max="2.5" value="1.0" step="0.1" oninput="tDur=parseFloat(this.value);document.getElementById('tdv').textContent=tDur.toFixed(1)+'s'"><span id="tdv">1.0s</span></div>
+    <div class="tpd">
+      <label>Müddət:</label>
+      <input type="range" id="tds" min="0.3" max="2.5" value="1.0" step="0.1" oninput="tDur=parseFloat(this.value);document.getElementById('tdv').textContent=tDur.toFixed(1)+'s'">
+      <span id="tdv">1.0s</span>
+    </div>
   </div>
   <div class="tpg">
     <div class="ti on" onclick="sTr('fade',this)"><span class="tii">🌫</span><div class="tin">Fade</div></div>
@@ -265,39 +333,58 @@ nav{display:flex;align-items:center;gap:8px;padding:0 16px;height:50px;backgroun
   </div>
 </div>
 
+<!-- ── RENDER PANEL ── -->
+<div class="rpan">
+  <div class="rp-row">
+    <span class="rp-lbl">Keyfiyyət:</span>
+    <select class="rp-sel" id="resSel">
+      <option value="1920x1080">1080p Full HD</option>
+      <option value="1280x720" selected>720p HD</option>
+      <option value="854x480">480p</option>
+    </select>
+    <span class="rp-lbl">n8n Callback:</span>
+    <input class="rp-cb-url" id="cbUrl" placeholder="https://n8n.../webhook/render-done">
+    <button class="btn-render" id="btnRender" onclick="startRender()">▶ Render et</button>
+    <span class="rp-st" id="rpSt"></span>
+  </div>
+  <div class="prog-bar" id="progBar">
+    <div class="prog-fill" id="progFill"></div>
+  </div>
+</div>
+
+<!-- ── TIMELINE ── -->
 <div class="tl">
   <div class="tlh"><span class="tll">Timeline</span><span class="tlc" id="tlc"></span></div>
   <div class="tlr" id="tlr"></div>
-  <div class="tlrow"><span class="tllb">Video</span><div class="tlln" id="tll"><div class="phl" id="phl" style="left:0"></div></div></div>
+  <div class="tlrow">
+    <span class="tllb">Video</span>
+    <div class="tlln" id="tll"><div class="phl" id="phl" style="left:0"></div></div>
+  </div>
 </div>
 
 <script>
 const vA=document.getElementById('vA'),vB=document.getElementById('vB');
 const sk=document.getElementById('sk'),pbt=document.getElementById('pbt');
-const tdt=document.getElementById('tdt'),tind=document.getElementById('tind');
+const tdtEl=document.getElementById('tdt'),tind=document.getElementById('tind');
 const vc=document.getElementById('vc');
 
 let clips=[],ci=0,si=-1,totD=0,gT=0;
 let isP=false,inT=false,tDur=1.0,tTm=null,defT='fade',curR='16:9',autoM=true;
+let apiUrl='',pollTimer=null;
 
-// ── PLATFORM → RATIO XƏRİTƏSİ ───────────────────────────────
-// n8n bu parametri göndərir: ?platform=youtube_shorts
-// və ya POST body-də: { "platform": "youtube_shorts" }
 const PMAP={
-  'youtube':'16:9','youtube_standard':'16:9','youtube_long':'16:9',
+  'youtube':'16:9','youtube_standard':'16:9',
   'youtube_shorts':'9:16','shorts':'9:16','tiktok':'9:16',
-  'instagram_reels':'9:16','reels':'9:16','facebook_reels':'9:16','snapchat':'9:16',
+  'instagram_reels':'9:16','reels':'9:16','snapchat':'9:16',
   'instagram':'1:1','instagram_square':'1:1','facebook':'1:1',
-  'instagram_portrait':'4:5','instagram_story':'9:16','facebook_story':'9:16',
+  'instagram_portrait':'4:5','instagram_story':'9:16',
 };
-
 const RCFG={
   '16:9':{cls:'r169',lbl:'16:9',res:'1920×1080',bid:'r169'},
   '9:16':{cls:'r916',lbl:'9:16',res:'1080×1920',bid:'r916'},
   '1:1': {cls:'r11', lbl:'1:1', res:'1080×1080',bid:'r11'},
   '4:5': {cls:'r45', lbl:'4:5', res:'1080×1350',bid:'r45'},
 };
-
 const COLS=['#6c63ff','#38bdf8','#34d399','#f97316','#ec4899','#fbbf24','#a78bfa'];
 const TNM={'fade':'Fade','sl':'Sol','sr':'Sağ','su':'Yuxarı','zoom':'Zoom','blur':'Blur','flash':'Flash','dissolve':'Dissolve','wipe':'Wipe'};
 const TCS={
@@ -308,13 +395,50 @@ const TCS={
 
 function fmt(t){if(!isFinite(t)||t<0)t=0;const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s;}
 
+// ── API QOŞULMA ───────────────────────────────────────────────
+function connectApi(){
+  apiUrl=document.getElementById('apiInput').value.trim().replace(/\/+$/,'');
+  if(!apiUrl){setSt('URL daxil edin','');return;}
+  // https olmadıqda əlavə et
+  if(!apiUrl.startsWith('http')) apiUrl='https://'+apiUrl;
+  document.getElementById('apiInput').value=apiUrl;
+  localStorage.setItem('ve_api',apiUrl);
+  setSt('Yoxlanılır...','');
+  fetch(apiUrl+'/health',{signal:AbortSignal.timeout(6000)})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='ok'){
+        document.getElementById('sdot').className='sdot ok';
+        document.getElementById('stxt').textContent='Qoşuldu ✓';
+      } else throw new Error();
+    })
+    .catch(()=>{
+      document.getElementById('sdot').className='sdot err';
+      document.getElementById('stxt').textContent='Bağlantı yoxdur';
+    });
+}
+
+function setSt(msg,cls){
+  const el=document.getElementById('rpSt');
+  el.textContent=msg;el.className='rp-st '+(cls||'');
+}
+
+// ── URL PARAMETRLƏRİ ──────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('ve_api');
+  if(saved){apiUrl=saved;document.getElementById('apiInput').value=saved;connectApi();}
+  const p=new URLSearchParams(window.location.search);
+  const rp=p.get('ratio'),pl=p.get('platform');
+  if(rp&&RCFG[rp]){applyR(rp,'auto');showBanner('n8n ratio: '+rp,rp);}
+  else if(pl){const r=detectR(pl);applyR(r,'auto');showBanner('n8n platform="'+pl+'" → '+r,r);}
+});
+
 function detectR(p){return PMAP[p.toLowerCase().trim()]||'16:9';}
 
 function applyR(r,src){
   curR=r;const cfg=RCFG[r];
   vc.className='vc '+cfg.cls;
-  const rb=document.getElementById('rb');
-  rb.textContent=cfg.lbl;
+  const rb=document.getElementById('rb');rb.textContent=cfg.lbl;
   rb.className='rbadge '+(src==='auto'?'a':'m');
   document.querySelectorAll('.rbtn').forEach(b=>{b.classList.remove('on','aset');b.querySelector('.apin')?.remove();});
   const ab=document.getElementById(cfg.bid);
@@ -333,14 +457,9 @@ function showBanner(msg,r){
 
 function togAuto(){
   autoM=!autoM;
-  const tog=document.getElementById('atog');
-  tog.classList.toggle('off',!autoM);
+  document.getElementById('atog').classList.toggle('off',!autoM);
   document.getElementById('pmap').style.display=autoM?'flex':'none';
-  if(!autoM){
-    document.querySelectorAll('.rbtn').forEach(b=>{b.classList.remove('aset');b.querySelector('.apin')?.remove();});
-    document.getElementById('rb').className='rbadge m';
-    document.getElementById('r169').classList.add('on');
-  }
+  if(!autoM){document.querySelectorAll('.rbtn').forEach(b=>{b.classList.remove('aset');b.querySelector('.apin')?.remove();});document.getElementById('rb').className='rbadge m';document.getElementById('r169').classList.add('on');}
 }
 
 function manR(r,btn){
@@ -348,31 +467,18 @@ function manR(r,btn){
   applyR(r,'manual');
 }
 
-// ── n8n SİMULASİYASI ─────────────────────────────────────────
 function simN8n(platform){
   if(!autoM){autoM=true;document.getElementById('atog').classList.remove('off');document.getElementById('pmap').style.display='flex';}
-  const r=detectR(platform);
-  applyR(r,'auto');
-  showBanner(`n8n: platform="${platform}" → avtomatik ${r} seçildi`,r);
+  const r=detectR(platform);applyR(r,'auto');showBanner('n8n: platform="'+platform+'" → '+r,r);
 }
 
-// ── URL PARAMETRLƏRİ (n8n-dən gələn) ────────────────────────
-// n8n bu şəkildə URL açır:
-// https://sayt.com?platform=youtube_shorts
-// və ya: https://sayt.com?ratio=9:16
-window.addEventListener('DOMContentLoaded',()=>{
-  const p=new URLSearchParams(window.location.search);
-  const rp=p.get('ratio'),pl=p.get('platform');
-  if(rp&&RCFG[rp]){applyR(rp,'auto');showBanner(`n8n ratio parametri: ${rp}`,rp);}
-  else if(pl){const r=detectR(pl);applyR(r,'auto');showBanner(`n8n platform="${pl}" → avtomatik ${r} seçildi`,r);}
-});
-
+// ── VİDEO ────────────────────────────────────────────────────
 function addC(inp){
   const files=Array.from(inp.files);if(!files.length)return;
   let ld=0;
   files.forEach(f=>{
     const url=URL.createObjectURL(f),tmp=document.createElement('video');tmp.src=url;
-    tmp.onloadedmetadata=()=>{clips.push({name:f.name,url,duration:tmp.duration,trans:defT});ld++;if(ld===files.length){rebAll();if(clips.length===files.length)ldI(0,false);}};
+    tmp.onloadedmetadata=()=>{clips.push({name:f.name,url,duration:tmp.duration,trans:defT,local:true});ld++;if(ld===files.length){rebAll();if(clips.length===files.length)ldI(0,false);}};
   });inp.value='';
 }
 
@@ -382,7 +488,7 @@ function ldI(idx,wT){
   ci=idx;si=idx;vA.src=clips[idx].url;
   vA.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;opacity:1;transform:none;filter:none;animation:none';
   vB.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;opacity:0;transform:none;filter:none;animation:none';
-  vc.style.display='block';document.getElementById('ph').style.display='none';
+  vc.style.display='block';document.getElementById('ph2').style.display='none';
   vA.onloadedmetadata=()=>{if(isP)vA.play().catch(()=>{});};
   vA.ontimeupdate=onTU;vA.onended=onCE;bldSB();
 }
@@ -408,16 +514,72 @@ function doTr(fi,ti){
 }
 
 function togP(){if(!clips.length)return;if(vA.paused&&!inT){vA.play().catch(()=>{});pbt.textContent='⏸';isP=true;}else{vA.pause();pbt.textContent='▶';isP=false;}}
-function onTU(){if(inT)return;const off=clips.slice(0,ci).reduce((s,c)=>s+c.duration,0);gT=off+vA.currentTime;const pct=totD>0?(gT/totD*100).toFixed(2):0;sk.value=gT;tdt.textContent=fmt(gT)+' / '+fmt(totD);document.getElementById('phl').style.left=pct+'%';}
+function onTU(){if(inT)return;const off=clips.slice(0,ci).reduce((s,c)=>s+c.duration,0);gT=off+vA.currentTime;const pct=totD>0?(gT/totD*100).toFixed(2):0;sk.value=gT;tdtEl.textContent=fmt(gT)+' / '+fmt(totD);document.getElementById('phl').style.left=pct+'%';}
 function onCE(){if(ci<clips.length-1)ldI(ci+1,true);else{isP=false;pbt.textContent='▶';}}
 function onSk(v){if(inT)return;const t=parseFloat(v);let acc=0;for(let i=0;i<clips.length;i++){if(t<=acc+clips[i].duration){if(i!==ci){ci=i;si=i;vA.src=clips[i].url;vA.ontimeupdate=onTU;vA.onended=onCE;bldSB();}vA.currentTime=t-acc;return;}acc+=clips[i].duration;}}
 function jC(d){const n=ci+d;if(n>=0&&n<clips.length)ldI(n,isP);}
 function mvC(d){if(si<0||si+d<0||si+d>=clips.length)return;const n=si+d;[clips[si],clips[n]]=[clips[n],clips[si]];si=n;ci=n;rebAll();}
-function rmC(i){clips.splice(i,1);if(!clips.length){vA.src='';vc.style.display='none';document.getElementById('ph').style.display='block';ci=0;si=-1;}else{ci=Math.min(ci,clips.length-1);ldI(ci,false);}rebAll();}
+function rmC(i){clips.splice(i,1);if(!clips.length){vA.src='';vc.style.display='none';document.getElementById('ph2').style.display='block';ci=0;si=-1;}else{ci=Math.min(ci,clips.length-1);ldI(ci,false);}rebAll();}
+
+// ── RENDER ───────────────────────────────────────────────────
+async function startRender(){
+  if(!clips.length){alert('Video əlavə edin');return;}
+  if(!apiUrl){alert('Əvvəlcə Railway API URL-ini navbar-da "API" sahəsinə yazın və "Qoş" düyməsinə basın');return;}
+  const btn=document.getElementById('btnRender');
+  btn.disabled=true;btn.textContent='Göndərilir...';
+  setSt('Render başladılır...','proc');
+  document.getElementById('progBar').style.display='block';
+  document.getElementById('progFill').style.width='5%';
+  const res=document.getElementById('resSel').value;
+  const cb=document.getElementById('cbUrl').value.trim();
+  const apiKey=localStorage.getItem('ve_key')||prompt('API açarı (x-api-key):')||'';
+  if(apiKey)localStorage.setItem('ve_key',apiKey);
+  try{
+    const r=await fetch(apiUrl+'/api/render',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey},
+      body:JSON.stringify({
+        clips:clips.map(c=>({fileId:c.fileId||c.url,transition:c.trans})),
+        transitionDuration:tDur,resolution:res,
+        callbackUrl:cb||undefined,
+        aspectRatio:curR,
+      }),
+    });
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    setSt('İş başladı: '+d.jobId.slice(0,8)+'...','proc');
+    btn.textContent='▶ Render et';btn.disabled=false;
+    pollJob(d.jobId,d.statusUrl);
+  }catch(e){
+    setSt('Xəta: '+e.message,'err');
+    btn.textContent='▶ Render et';btn.disabled=false;
+    document.getElementById('progBar').style.display='none';
+  }
+}
+
+function pollJob(jobId,statusUrl){
+  if(pollTimer)clearInterval(pollTimer);
+  const apiKey=localStorage.getItem('ve_key')||'';
+  pollTimer=setInterval(async()=>{
+    try{
+      const r=await fetch(statusUrl||(apiUrl+'/api/status/'+jobId),{headers:{'x-api-key':apiKey}});
+      const d=await r.json();
+      document.getElementById('progFill').style.width=(d.progress||0)+'%';
+      if(d.status==='completed'){
+        clearInterval(pollTimer);setSt('✓ Render tamamlandı!','ok');
+        document.getElementById('progFill').style.width='100%';
+        setTimeout(()=>{document.getElementById('progBar').style.display='none';},2000);
+        if(d.outputUrl){const a=document.createElement('a');a.href=d.outputUrl;a.download='video.mp4';a.click();}
+      }else if(d.status==='failed'){clearInterval(pollTimer);setSt('Uğursuz: '+d.error,'err');document.getElementById('progBar').style.display='none';}
+      else setSt('İşlənir: '+(d.progress||0)+'%','proc');
+    }catch(e){clearInterval(pollTimer);}
+  },2000);
+}
+
 function sTr(t,el){defT=t;document.querySelectorAll('.ti').forEach(e=>e.classList.remove('on'));el.classList.add('on');if(si>=0&&si<clips.length){clips[si].trans=t;bldSB();bldTL();}}
 function sTrD(i,v){clips[i].trans=v;bldSB();bldTL();}
 function rebAll(){totD=clips.reduce((s,c)=>s+c.duration,0);sk.max=totD||100;bldSB();bldTL();updSI();}
-function updSI(){const cfg=RCFG[curR];document.getElementById('si').textContent=clips.length?`${clips.length} klip · ${fmt(totD)} · ${cfg.lbl} · ${cfg.res}`:`${cfg.lbl} · ${cfg.res}`;}
+function updSI(){const cfg=RCFG[curR];document.getElementById('si').textContent=clips.length?`${clips.length} klip · ${fmt(totD)} · ${cfg.lbl}`:`${cfg.lbl} · ${cfg.res}`;}
 function bldSB(){
   const list=document.getElementById('clist');document.getElementById('em').style.display=clips.length?'none':'block';
   list.querySelectorAll('.cc').forEach(e=>e.remove());
@@ -444,9 +606,8 @@ function bldTL(){
 function doExp(){
   if(!clips.length){alert('Video əlavə edin');return;}
   const cfg=RCFG[curR];
-  const b=document.querySelector('.btn-ac');b.textContent='İşlənir...';b.style.background='#2a2a40';
-  setTimeout(()=>{b.textContent='✓ Hazır!';b.style.background='#059669';setTimeout(()=>{b.textContent='↓ Export';b.style.background='#6c63ff';},2500);
-  alert(`Export:\nFormat: ${cfg.lbl} (${cfg.res})\nKlip: ${clips.length}\nMüddət: ${fmt(totD)}\n\nRatio API-yə göndərildi.`);},1500);
+  if(apiUrl){startRender();return;}
+  alert('API qoşulmayıb. Navbar-da Railway URL-ini daxil edin.');
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
