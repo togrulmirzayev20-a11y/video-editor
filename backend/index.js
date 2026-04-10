@@ -3,74 +3,60 @@ const cors = require("cors");
 const crypto = require("crypto");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
+const multer = require("multer"); // Fayl qəbul etmək üçün
 
 const app = express();
+const upload = multer({ dest: "uploads/" }); // Səsləri müvəqqəti bura yığacaq
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 
 const jobs = {};
 
-app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.post("/api/render", upload.single("audio"), (req, res) => {
+  const { videoUrl } = req.body;
+  const audioFile = req.file; // n8n-dən gələn səs faylı
 
-app.post("/api/render", (req, res) => {
-  const { clips } = req.body;
-  if (!clips || clips.length === 0) return res.status(400).json({ error: "Klip yoxdur" });
+  if (!videoUrl) return res.status(400).json({ error: "Video linki yoxdur" });
 
   const jobId = crypto.randomUUID();
-  const outputFileName = `video_${jobId}.mp4`;
+  const outputFileName = `final_${jobId}.mp4`;
   const outputPath = path.join(__dirname, outputFileName);
 
-  jobs[jobId] = { status: "processing", progress: 0, outputUrl: null };
+  jobs[jobId] = { status: "processing", progress: 0 };
 
-  res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
+  res.json({ jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
 
-  // 🎬 FFMEPG - SƏSSİZ VƏ 9:16 FORMATINDA
-  ffmpeg(clips[0].fileId)
-    .inputOptions([
-        "-reconnect 1",
-        "-reconnect_at_eof 1",
-        "-reconnect_streamed 1",
-        "-reconnect_delay_max 5",
-        "-protocol_whitelist file,http,https,tcp,tls,crypto",
-        "-user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    ])
-  .outputOptions([
+  let command = ffmpeg(videoUrl)
+    .inputOptions(["-reconnect 1", "-reconnect_streamed 1", "-reconnect_delay_max 5"]);
+
+  if (audioFile) {
+    command = command.input(audioFile.path);
+  }
+
+  command
+    .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "-c:v libx264",
-      "-preset superfast",
-      "-crf 28",
-      "-threads 1",
-      "-pix_fmt yuv420p",
-      "-map 0:v:0",         
-      audioUrl ? "-map 1:a:0" : "-an", 
-      "-c:a aac",           // 🎵 Azure-dan gələn səsi standart AAC formatına çevirir
-      "-b:a 128k",          // Səs keyfiyyətini sabit saxlayır
-      "-shortest",          
-      "-movflags +faststart"
+      "-c:v libx264", "-preset superfast", "-crf 28", "-threads 1", "-pix_fmt yuv420p",
+      "-map 0:v:0",
+      audioFile ? "-map 1:a:0" : "-an",
+      "-c:a aac", "-shortest", "-movflags +faststart"
     ])
-    .on("progress", (progress) => {
-      jobs[jobId].progress = progress.percent ? Math.round(progress.percent) : "Emal olunur...";
-    })
     .on("end", () => {
       jobs[jobId].status = "completed";
-      jobs[jobId].progress = 100;
       jobs[jobId].outputUrl = `https://${req.headers.host}/${outputFileName}`;
-      console.log("✅ Video hazır (səssiz):", jobs[jobId].outputUrl);
     })
     .on("error", (err) => {
       jobs[jobId].status = "failed";
       jobs[jobId].error = err.message;
-      console.log("❌ Xəta:", err.message);
     })
     .save(outputPath);
 });
 
 app.get("/api/status/:jobId", (req, res) => {
-  const job = jobs[req.params.jobId];
-  job ? res.json(job) : res.status(404).json({ error: "İş tapılmadı" });
+  res.json(jobs[req.params.jobId] || { error: "Tapılmadı" });
 });
 
-app.listen(PORT, () => console.log("Server aktiv: " + PORT));
+app.listen(PORT, () => console.log("Server hazırdır!"));
