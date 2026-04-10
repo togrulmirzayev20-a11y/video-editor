@@ -3,6 +3,10 @@ const cors = require("cors");
 const crypto = require("crypto");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
+const ffmpegStatic = require("ffmpeg-static");
+
+// CHEAT CODE: FFmpeg-i birbaşa paketdən oxuyuruq!
+ffmpeg.setFfmpegPath(ffmpegStatic);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
