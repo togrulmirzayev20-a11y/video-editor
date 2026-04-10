@@ -58,3 +58,5 @@ app.get("/api/status/:jobId", (req, res) => {
 });
 
 app.listen(PORT, () => console.log("Server işləyir: " + PORT));
+
+
