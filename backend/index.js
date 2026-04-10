@@ -2,17 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
 const path = require("path");
-const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpeg = require("fluent-ffmpeg");
-
-ffmpeg.setFfmpegPath(ffmpegPath);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
-// Hazır videoları brauzerdə göstərmək üçün icazə:
 app.use(express.static(__dirname)); 
 
 const jobs = {};
@@ -30,17 +26,15 @@ app.post("/api/render", (req, res) => {
 
   jobs[jobId] = { status: "processing", progress: 0, outputUrl: null };
 
-  // N8n-ə cavab veririk ki, işə başladıq
   res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
 
-  // 🎬 ƏSL FFMPEG İŞƏ DÜŞÜR (Videonu 9:16 Shorts formatına salır)
+  // ƏSL FFMPEG İŞƏ DÜŞÜR
   ffmpeg(clips[0].fileId)
     .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "-c:a copy" // Səsi olduğu kimi saxla
+      "-c:a copy"
     ])
     .on("progress", (progress) => {
-      // Faizləri yeniləyirik
       jobs[jobId].progress = Math.round(progress.percent || 0);
       console.log(`Render faizi: ${jobs[jobId].progress}%`);
     })
