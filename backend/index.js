@@ -16,7 +16,7 @@ app.use(express.static(__dirname));
 const jobs = {};
 
 app.post("/api/render", upload.single("audio"), (req, res) => {
-  const { videoUrl } = req.body;
+ const videoUrl = req.query.videoUrl || req.body.videoUrl;
   const audioFile = req.file; // n8n-dən gələn səs faylı
 
   if (!videoUrl) return res.status(400).json({ error: "Video linki yoxdur" });
