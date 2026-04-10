@@ -1,73 +1,66 @@
 const express = require("express");
 const cors = require("cors");
-const crypto = require("crypto"); // İş nömrələri (jobId) yaratmaq üçün
+const crypto = require("crypto");
+const path = require("path");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const ffmpeg = require("fluent-ffmpeg");
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+// Hazır videoları brauzerdə göstərmək üçün icazə:
+app.use(express.static(__dirname)); 
 
-// İşlərin statusunu yaddaşda saxlamaq üçün obyekt
 const jobs = {};
 
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", service: "VideoEditor API", version: "1.0.0" });
-});
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.get("/", (req, res) => res.json({ message: "VideoEditor API işləyir" }));
 
-app.get("/", (req, res) => {
-  res.json({ message: "VideoEditor API işləyir", endpoints: ["/health", "/api/render"] });
-});
-
-// 🚀 YENİ ƏLAVƏ: n8n-dən və ya saytdan məlumatı qəbul edən qapı
 app.post("/api/render", (req, res) => {
-  const { clips, aspectRatio, resolution, transitionDuration } = req.body;
+  const { clips } = req.body;
+  if (!clips || clips.length === 0) return res.status(400).json({ error: "Klip yoxdur" });
 
-  // n8n-in bizə nə göndərdiyini serverin loqlarında görmək üçün
-  console.log("n8n-dən yeni sifariş gəldi! Detallar:", req.body);
-
-  if (!clips || clips.length === 0) {
-    return res.status(400).json({ error: "Heç bir klip tapılmadı" });
-  }
-
-  // Yeni bir iş (job) yaradırıq
   const jobId = crypto.randomUUID();
-  jobs[jobId] = {
-    status: "processing",
-    progress: 0,
-    outputUrl: null
-  };
+  const outputFileName = `video_${jobId}.mp4`;
+  const outputPath = path.join(__dirname, outputFileName);
 
-  // 🛠 SİMULYASİYA: Burada FFmpeg əvəzinə yalandan 10 saniyəlik render edirik
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    jobs[jobId].progress = progress;
+  jobs[jobId] = { status: "processing", progress: 0, outputUrl: null };
 
-    if (progress >= 100) {
-      clearInterval(interval);
+  // N8n-ə cavab veririk ki, işə başladıq
+  res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
+
+  // 🎬 ƏSL FFMPEG İŞƏ DÜŞÜR (Videonu 9:16 Shorts formatına salır)
+  ffmpeg(clips[0].fileId)
+    .outputOptions([
+      "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
+      "-c:a copy" // Səsi olduğu kimi saxla
+    ])
+    .on("progress", (progress) => {
+      // Faizləri yeniləyirik
+      jobs[jobId].progress = Math.round(progress.percent || 0);
+      console.log(`Render faizi: ${jobs[jobId].progress}%`);
+    })
+    .on("end", () => {
       jobs[jobId].status = "completed";
-      // Test üçün hələlik bizə göndərilən o Amazon linkini hazır video kimi geri qaytarırıq
-      jobs[jobId].outputUrl = clips[0].fileId; 
-    }
-  }, 1000); // Hər saniyə 10% artır
-
-  // N8n-ə dərhal cavab qaytarırıq ki, xəta verməsin, "iş gedir" bilsin
-  res.json({ 
-    message: "Render başladı", 
-    jobId: jobId, 
-    statusUrl: `https://${req.headers.host}/api/status/${jobId}` 
-  });
+      jobs[jobId].progress = 100;
+      jobs[jobId].outputUrl = `https://${req.headers.host}/${outputFileName}`;
+      console.log("✅ Video hazır oldu:", jobs[jobId].outputUrl);
+    })
+    .on("error", (err) => {
+      jobs[jobId].status = "failed";
+      jobs[jobId].error = err.message;
+      console.log("❌ Xəta:", err.message);
+    })
+    .save(outputPath);
 });
 
-// 🚀 YENİ ƏLAVƏ: Frontend-in progress-i (faizi) yoxlaması üçün
 app.get("/api/status/:jobId", (req, res) => {
   const job = jobs[req.params.jobId];
-  if (!job) {
-    return res.status(404).json({ error: "İş tapılmadı" });
-  }
-  res.json(job);
+  job ? res.json(job) : res.status(404).json({ error: "İş tapılmadı" });
 });
 
-app.listen(PORT, () => {
-  console.log("Server port " + PORT + " da işləyir");
-});
+app.listen(PORT, () => console.log("Server işləyir: " + PORT));
