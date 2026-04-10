@@ -37,14 +37,18 @@ app.post("/api/render", (req, res) => {
         "-protocol_whitelist file,http,https,tcp,tls,crypto",
         "-user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     ])
-    .outputOptions([
+  .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
       "-c:v libx264",
       "-preset superfast",
       "-crf 28",
       "-threads 1",
       "-pix_fmt yuv420p",
-      "-an",                // 🔇 VACİB: Videonun orijinal səsini tamamilə silir (MUTE)
+      "-map 0:v:0",         
+      audioUrl ? "-map 1:a:0" : "-an", 
+      "-c:a aac",           // 🎵 Azure-dan gələn səsi standart AAC formatına çevirir
+      "-b:a 128k",          // Səs keyfiyyətini sabit saxlayır
+      "-shortest",          
       "-movflags +faststart"
     ])
     .on("progress", (progress) => {
