@@ -28,11 +28,14 @@ app.post("/api/render", (req, res) => {
 
   res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
 
-  // ƏSL FFMPEG İŞƏ DÜŞÜR
+  // 🎬 ƏSL FFMPEG İŞƏ DÜŞÜR (RAM-a qənaət edən yeni ayarlarla)
   ffmpeg(clips[0].fileId)
     .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "-c:a copy"
+      "-c:v libx264",       // Videonun formatını dəqiqləşdiririk
+      "-preset ultrafast",  // RAM-dan çox az istifadə et və sürətli ol
+      "-threads 1",         // Eyni anda yalnız 1 nüvə işlət ki, server boğulmasın
+      "-c:a copy"           // Səsi olduğu kimi saxla
     ])
     .on("progress", (progress) => {
       jobs[jobId].progress = Math.round(progress.percent || 0);
@@ -58,5 +61,3 @@ app.get("/api/status/:jobId", (req, res) => {
 });
 
 app.listen(PORT, () => console.log("Server işləyir: " + PORT));
-
-
