@@ -27,7 +27,7 @@ app.post("/api/render", (req, res) => {
 
   res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
 
-  // 🚀 GÜCLƏNDİRİLMİŞ FFMPEG KOMANDASI
+  // 🎬 FFMEPG - SƏSSİZ VƏ 9:16 FORMATINDA
   ffmpeg(clips[0].fileId)
     .inputOptions([
         "-reconnect 1",
@@ -40,28 +40,26 @@ app.post("/api/render", (req, res) => {
     .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
       "-c:v libx264",
-      "-preset superfast", // RAM üçün ən yüngül rejim
-      "-crf 28",           // Fayl ölçüsünü kiçildir ki, server boğulmasın
+      "-preset superfast",
+      "-crf 28",
       "-threads 1",
-      "-pix_fmt yuv420p",  // TikTok/YouTube üçün tam uyğunluq
-      "-c:a aac",          // Səsi daha stabil formata salır
-      "-movflags +faststart" // Videonun linkdə tez açılması üçün
+      "-pix_fmt yuv420p",
+      "-an",                // 🔇 VACİB: Videonun orijinal səsini tamamilə silir (MUTE)
+      "-movflags +faststart"
     ])
     .on("progress", (progress) => {
-      // Əgər progress.percent yoxdursa, vaxta görə hesabla
-      jobs[jobId].progress = progress.percent ? Math.round(progress.percent) : "Video emal edilir...";
-      console.log(`Render statusu: ${jobs[jobId].progress}`);
+      jobs[jobId].progress = progress.percent ? Math.round(progress.percent) : "Emal olunur...";
     })
     .on("end", () => {
       jobs[jobId].status = "completed";
       jobs[jobId].progress = 100;
       jobs[jobId].outputUrl = `https://${req.headers.host}/${outputFileName}`;
-      console.log("✅ UĞUR:", jobs[jobId].outputUrl);
+      console.log("✅ Video hazır (səssiz):", jobs[jobId].outputUrl);
     })
     .on("error", (err) => {
       jobs[jobId].status = "failed";
       jobs[jobId].error = err.message;
-      console.log("❌ XƏTA:", err.message);
+      console.log("❌ Xəta:", err.message);
     })
     .save(outputPath);
 });
