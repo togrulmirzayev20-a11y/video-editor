@@ -14,7 +14,6 @@ app.use(express.static(__dirname));
 const jobs = {};
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
-app.get("/", (req, res) => res.json({ message: "VideoEditor API işləyir" }));
 
 app.post("/api/render", (req, res) => {
   const { clips } = req.body;
@@ -28,35 +27,41 @@ app.post("/api/render", (req, res) => {
 
   res.json({ message: "Render başladı", jobId, statusUrl: `https://${req.headers.host}/api/status/${jobId}` });
 
-  // 🎬 ƏSL FFMPEG İŞƏ DÜŞÜR
+  // 🚀 GÜCLƏNDİRİLMİŞ FFMPEG KOMANDASI
   ffmpeg(clips[0].fileId)
     .inputOptions([
-      "-protocol_whitelist file,http,https,tcp,tls,crypto",
-      // YENİ: Amazonu aldatmaq üçün özümüzü Google Chrome kimi göstəririk
-      "-user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "-reconnect 1",
+        "-reconnect_at_eof 1",
+        "-reconnect_streamed 1",
+        "-reconnect_delay_max 5",
+        "-protocol_whitelist file,http,https,tcp,tls,crypto",
+        "-user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     ])
     .outputOptions([
       "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "-c:v libx264",       
-      "-preset ultrafast",  
-      "-threads 1",         
-      "-c:a copy"           
+      "-c:v libx264",
+      "-preset superfast", // RAM üçün ən yüngül rejim
+      "-crf 28",           // Fayl ölçüsünü kiçildir ki, server boğulmasın
+      "-threads 1",
+      "-pix_fmt yuv420p",  // TikTok/YouTube üçün tam uyğunluq
+      "-c:a aac",          // Səsi daha stabil formata salır
+      "-movflags +faststart" // Videonun linkdə tez açılması üçün
     ])
     .on("progress", (progress) => {
-      // .m3u8 fayllarında faiz həmişə düzgün gəlməyə bilər, narahat olma
-      jobs[jobId].progress = Math.round(progress.percent || 0);
-      console.log(`Render faizi: ${jobs[jobId].progress}%`);
+      // Əgər progress.percent yoxdursa, vaxta görə hesabla
+      jobs[jobId].progress = progress.percent ? Math.round(progress.percent) : "Video emal edilir...";
+      console.log(`Render statusu: ${jobs[jobId].progress}`);
     })
     .on("end", () => {
       jobs[jobId].status = "completed";
       jobs[jobId].progress = 100;
       jobs[jobId].outputUrl = `https://${req.headers.host}/${outputFileName}`;
-      console.log("✅ Video hazır oldu:", jobs[jobId].outputUrl);
+      console.log("✅ UĞUR:", jobs[jobId].outputUrl);
     })
     .on("error", (err) => {
       jobs[jobId].status = "failed";
       jobs[jobId].error = err.message;
-      console.log("❌ Xəta:", err.message);
+      console.log("❌ XƏTA:", err.message);
     })
     .save(outputPath);
 });
@@ -66,4 +71,4 @@ app.get("/api/status/:jobId", (req, res) => {
   job ? res.json(job) : res.status(404).json({ error: "İş tapılmadı" });
 });
 
-app.listen(PORT, () => console.log("Server işləyir: " + PORT));
+app.listen(PORT, () => console.log("Server aktiv: " + PORT));
