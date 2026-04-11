@@ -1,40 +1,94 @@
 const express = require("express");
-const multer = require("multer");
-const ffmpeg = require("fluent-ffmpeg");
+const cors = require("cors");
+const { exec } = require("child_process");
 const fs = require("fs");
+const path = require("path");
+const https = require("https");
+const http = require("http");
+
 const app = express();
-const upload = multer({ dest: "uploads/" });
+app.use(cors());
+app.use(express.json({ limit: "50mb" }));
 
-app.post("/api/render", upload.single("audio"), (req, res) => {
-  const videoUrl = req.query.videoUrl;
-  const audioPath = req.file.path;
-  const outputPath = `uploads/output-${Date.now()}.mp4`;
+if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
+if (!fs.existsSync("outputs")) fs.mkdirSync("outputs");
 
-  console.log("Processing started: ", videoUrl);
+// ── SAĞLAMLIK YOXLAMASI ──────────────────────────────────────
+app.get("/health", (_req, res) => {
+  exec("ffmpeg -version", (err) => {
+    res.json({
+      status: "ok",
+      service: "VideoEditor API",
+      ffmpeg: err ? "yoxdur" : "var",
+    });
+  });
+});
 
-  ffmpeg(videoUrl)
-    .input(audioPath)
-    .outputOptions([
-      "-c:v copy",   // Videonu render etmə, sadəcə kopyala
-      "-c:a aac",    // Səsi AAC formatına çevir
-      "-map 0:v:0",  // Birinci girişdən (Video) görüntünü götür
-      "-map 1:a:0",  // İkinci girişdən (Audio) səsi götür
-      "-shortest"    // Hansı qısadırsa, orada dayandır
-    ])
-    .on("error", (err) => {
-      console.error("FFmpeg Error: ", err.message);
-      res.status(500).send("Video processing failed.");
-    })
-    .on("end", () => {
-      console.log("Processing finished!");
-      res.download(outputPath, () => {
-        // Fayl göndərildikdən sonra təmizlik işləri
-        fs.unlinkSync(audioPath);
-        fs.unlinkSync(outputPath);
+// ── URL-DƏN FAYL YÜKLƏ ──────────────────────────────────────
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    const client = url.startsWith("https") ? https : http;
+    client.get(url, (res) => {
+      res.pipe(file);
+      file.on("finish", () => file.close(resolve));
+    }).on("error", (err) => {
+      fs.unlink(dest, () => {});
+      reject(err);
+    });
+  });
+}
+
+// ── VİDEO + SƏS BİRLƏŞDİR ───────────────────────────────────
+// POST /api/render
+// Body: { videoUrl: "https://...", audioUrl: "https://..." }
+app.post("/api/render", async (req, res) => {
+  const { videoUrl, audioUrl } = req.body;
+
+  if (!videoUrl || !audioUrl) {
+    return res.status(400).json({ error: "videoUrl və audioUrl lazımdır" });
+  }
+
+  const id = Date.now();
+  const videoPath = `uploads/video-${id}.mp4`;
+  const audioPath = `uploads/audio-${id}.mp3`;
+  const outputPath = `outputs/output-${id}.mp4`;
+
+  try {
+    console.log("Video yüklənir:", videoUrl);
+    await downloadFile(videoUrl, videoPath);
+
+    console.log("Audio yüklənir:", audioUrl);
+    await downloadFile(audioUrl, audioPath);
+
+    console.log("FFmpeg başladı...");
+
+    const cmd = `ffmpeg -i "${videoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}" -y`;
+
+    exec(cmd, (err, stdout, stderr) => {
+      // Temp faylları sil
+      fs.unlink(videoPath, () => {});
+      fs.unlink(audioPath, () => {});
+
+      if (err) {
+        console.error("FFmpeg xəta:", stderr);
+        return res.status(500).json({ error: "Video render uğursuz", detail: stderr });
+      }
+
+      console.log("Render tamamlandı:", outputPath);
+
+      // Faylı göndər, sonra sil
+      res.download(outputPath, `video-${id}.mp4`, () => {
+        fs.unlink(outputPath, () => {});
       });
-    })
-    .save(outputPath);
+    });
+
+  } catch (err) {
+    fs.unlink(videoPath, () => {});
+    fs.unlink(audioPath, () => {});
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server port ${PORT}-da işləyir`));
