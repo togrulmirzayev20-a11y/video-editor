@@ -37,13 +37,16 @@ app.post("/api/render", upload.single("audio"), (req, res) => {
   }
 
   command
-    .outputOptions([
-      "-vf scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "-c:v libx264", "-preset superfast", "-crf 28", "-threads 1", "-pix_fmt yuv420p",
-      "-map 0:v:0",
-      audioFile ? "-map 1:a:0" : "-an",
-      "-c:a aac", "-shortest", "-movflags +faststart"
-    ])
+ .outputOptions([
+  "-c:v libx264", 
+  "-preset ultrafast", // Ən sürətli və ən az RAM yeyən rejim
+  "-crf 32",           // Keyfiyyəti bir az azaldırıq ki, yük düşməsin
+  "-threads 1",        // Çox nüvə istifadə edib serveri dondurmasın
+  "-map 0:v:0",
+  audioFile ? "-map 1:a:0" : "-an",
+  "-c:a aac", 
+  "-shortest"
+])
     .on("end", () => {
       jobs[jobId].status = "completed";
       jobs[jobId].outputUrl = `https://${req.headers.host}/${outputFileName}`;
